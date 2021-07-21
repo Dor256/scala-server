@@ -1,0 +1,4 @@
+[debug] [scala-server-test] Classpath dependencies List()
+[debug] [scala-server-test] Dependencies from configurations List(scala-server)
+[debug] Bloop wrote the configuration of project 'scala-server-test' to '/Users/dor/Workspace/scala-server/.bloop/scala-server-test.json'
+[success] Generated .bloop/scala-server-test.json
