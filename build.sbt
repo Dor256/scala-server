@@ -11,6 +11,8 @@ lazy val ScalikeJDBCVersion = "3.5.0"
 lazy val LogBackVersion = "1.2.3"
 lazy val ScalaMockVersion = "5.1.0"
 lazy val ScalaTestVersion = "3.2.9"
+lazy val TsecVersion = "0.4.0-M11"
+lazy val ScalaBcryptVersion = "4.1"
 
 libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-blaze-server" % Http4sVersion,
@@ -22,5 +24,6 @@ libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc-config" % ScalikeJDBCVersion,
   "ch.qos.logback" % "logback-classic" % LogBackVersion,
   "org.scalamock" %% "scalamock" % ScalaMockVersion % Test,
-  "org.scalatest" %% "scalatest" % ScalaTestVersion % Test
+  "org.scalatest" %% "scalatest" % ScalaTestVersion % Test,
+  "com.github.t3hnar" %% "scala-bcrypt" % ScalaBcryptVersion
 )

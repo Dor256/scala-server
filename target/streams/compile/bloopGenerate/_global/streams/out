@@ -1,4 +1,4 @@
-[debug] [scala-server] Classpath dependencies List()
-[debug] [scala-server] Dependencies from configurations List()
-[debug] Bloop wrote the configuration of project 'scala-server' to '/Users/dor/Workspace/scala-server/.bloop/scala-server.json'
-[success] Generated .bloop/scala-server.json
+[debug] [workouts-server] Classpath dependencies List()
+[debug] [workouts-server] Dependencies from configurations List()
+[debug] Bloop wrote the configuration of project 'workouts-server' to '/Users/dorb/Workspace/workouts-server/.bloop/workouts-server.json'
+[success] Generated .bloop/workouts-server.json

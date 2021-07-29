@@ -1,3 +1,5 @@
 .vscode
 .metals
 .bloop
+**/.DS_Store
+.idea
