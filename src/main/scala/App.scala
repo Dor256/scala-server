@@ -20,92 +20,15 @@ import org.http4s.dsl.Http4sDsl
 import java.time.Year
 import scala.util.Try
 import java.io.File
-import db.DirectorDao._
-import db.MovieDao._
+import db.WorkoutDao._
 import db.Seed
+import routers.WorkoutRouter
+import routers.FileRouter
 
 object App extends IOApp {
-  implicit val yearQueryParamDecoder: QueryParamDecoder[Year] =
-    QueryParamDecoder[Int].emap { yearInt =>
-      Try(Year.of(yearInt))
-        .toEither
-        .leftMap { err =>
-          ParseFailure(err.getMessage, err.getMessage)
-        }
-    }
-
-  object DirectorQueryParamMatcher extends QueryParamDecoderMatcher[Int]("director")
-  object YearQueryParamMatcher extends OptionalValidatingQueryParamDecoderMatcher[Year]("year")
-
-  def movieRoutes[F[_]: Concurrent]: HttpRoutes[F] = {
-    val dsl = Http4sDsl[F]
-    import dsl._
-    implicit val movieDecoder: EntityDecoder[F, Movie] = jsonOf[F, Movie]
-
-    HttpRoutes.of[F] {
-      case GET -> Root / "movies" :? DirectorQueryParamMatcher(director) +& YearQueryParamMatcher(maybeYear) =>
-        val moviesByDirector = findMoviesByDirector(director)
-        maybeYear match {
-          case Some(validatedYear) => validatedYear.fold(
-            _ => BadRequest("The Year Was Badly Formatted"),
-            year => {
-              val moviesByDirectorAndYear = moviesByDirector.filter(_.year == year.getValue)
-              Ok(moviesByDirector.asJson) 
-            }
-          )
-          case None => Ok(moviesByDirector.asJson)
-        }
-        
-      case GET -> Root / "movies" / IntVar(movieId) =>
-        findMovieById(movieId) match {
-          case Some(movie) => Ok(movie.asJson)
-          case None => NotFound(s"No Movie with ID $movieId found in the database!")
-        }
-      case req @ POST -> Root / "movies" =>
-        for {
-          movie <- req.as[Movie]
-          _ = addMovie(movie)
-          res <- Ok()
-        } yield res
-    }
-  }
-
-  def directorRoutes[F[_]: Concurrent]: HttpRoutes[F] = {
-    val dsl = Http4sDsl[F]
-    import dsl._
-    implicit val directorDecoder: EntityDecoder[F, Director] = jsonOf[F, Director]
-
-    HttpRoutes.of[F] {
-      case GET -> Root / "directors" => Ok(findAllDirectors().asJson)
-      case req @ POST -> Root / "directors" =>
-        for {
-          director <- req.as[Director]
-          _ = addDirector(director)
-          res <- Ok()
-        } yield res
-    }
-  }
-
-  def fileRoutes: HttpRoutes[IO] = {
-    val dsl = Http4sDsl[IO]
-    import dsl._
-
-    val html = new File("/Users/dor/Workspace/scala-server/src/main/scala/static/index.html")
-
-    HttpRoutes.of[IO] {
-      case req @ GET -> Root => StaticFile.fromFile(html, Some(req))
-        .getOrElseF(NotFound("File not found!"))
-    }
-  }
-
-  def allRoutes[F[_]: Concurrent]: HttpRoutes[F] = {
-    movieRoutes[F] <+> directorRoutes[F]
-  }
-
   override def run(args: List[String]): IO[ExitCode] = {
-    Server.createTcpServer().start()
     Class.forName("org.h2.Driver")
-    ConnectionPool.singleton("jdbc:h2:mem:test", "sa", "")
+    ConnectionPool.singleton("jdbc:h2:mem:test;MODE=PostgreSQL", "sa", "")
 
     Seed()
 
@@ -118,8 +41,8 @@ object App extends IOApp {
     )
 
     val routes = Router(
-      "/" -> fileRoutes,
-      "/api" -> allRoutes[IO]
+      "/" -> FileRouter[IO],
+      "/workouts" -> WorkoutRouter[IO]
     ).orNotFound
 
     BlazeServerBuilder[IO](global)
